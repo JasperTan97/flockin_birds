@@ -3,6 +3,7 @@ import numpy as np
 from typing import Optional
 import pygame
 
+
 def mod2pi(theta):
     """
     Returns angle from 0 to 2pi
@@ -12,19 +13,28 @@ def mod2pi(theta):
     Returns:
         (float): wrapped angle between 0 to 2pi rad
     """
-    return (theta + np.pi) % 2*np.pi - np.pi
+    return (theta + np.pi) % 2 * np.pi - np.pi
+
 
 class Bird2D:
-    def __init__(self, x: float, y: float, theta: Optional[float]=None, speed:Optional[float]=2.0) -> None:
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        theta: Optional[float] = None,
+        speed: Optional[float] = 2.0,
+    ) -> None:
         """
         Initialises bird with state [x,y,theta,v]. All units are SI units, and metres and pixels are equivalent (these are giant birds)
         """
         self.position = np.array([x, y], dtype=np.float32)
-        self.theta = theta if theta is not None else np.random.uniform(0,2*np.pi)
+        self.theta = theta if theta is not None else np.random.uniform(0, 2 * np.pi)
         self.theta = mod2pi(self.theta)
         self.velocity = np.array([np.cos(self.theta), np.sin(self.theta)]) * speed
         # angular velocity is unnecessary (birds dont spin anyways)
-        self.acceleration = np.zeros(2, dtype=np.float32) # acceleration is initialised as 0
+        self.acceleration = np.zeros(
+            2, dtype=np.float32
+        )  # acceleration is initialised as 0
 
         # limits
         self.max_speed = 5.0
@@ -45,13 +55,13 @@ class Bird2D:
         Alignment: Each bird steers towards the average velocity of its neighbours
         Cohesion: Each bird steers towards the centre of mass of its neighbours
         Seperation: Each bird steers away from its neighbours to avoid collision.
-        
-        Each force would be normalised, limited and weighted. 
+
+        Each force would be normalised, limited and weighted.
         """
         alignment = np.zeros(2, dtype=np.float32)
         cohesion = np.zeros(2, dtype=np.float32)
         separation = np.zeros(2, dtype=np.float32)
-        total_neighbours = 0 
+        total_neighbours = 0
 
         for other_bird in birds:
             if other_bird == self:
@@ -63,10 +73,12 @@ class Bird2D:
 
                 if distance_between < self.separation_radius:
                     # normalised vector to neighbour
-                    separation += (self.position - other_bird.position) / distance_between
-                
+                    separation += (
+                        self.position - other_bird.position
+                    ) / distance_between
+
                 total_neighbours += 1
-        
+
         if total_neighbours > 0:
             alignment /= total_neighbours
             alignment = self._steer_towards(alignment)
@@ -75,11 +87,17 @@ class Bird2D:
             cohesion = self._steer_towards(cohesion)
 
             separation = self._steer_towards(separation)
-        
+
         # Apply weights to each behavior
-        self.apply_force(alignment * self.alignment_weight)
-        self.apply_force(cohesion * self.cohesion_weight)
-        self.apply_force(separation * self.separation_weight)
+        total_force = (
+            alignment * self.alignment_weight
+            + cohesion * self.cohesion_weight
+            + separation * self.separation_weight
+        )
+        force_magnitude = np.linalg.norm(total_force)
+        if force_magnitude > self.max_force:
+            total_force = (total_force / force_magnitude) * self.max_force
+        self.apply_force(total_force)
 
     def _steer_towards(self, target):
         """
@@ -87,11 +105,8 @@ class Bird2D:
         """
         if np.linalg.norm(target) == 0:
             return np.zeros(2, dtype=np.float32)
-        # normalise and clip
         target = (target / np.linalg.norm(target)) * self.max_speed
-        steer = target - self.velocity # error in speed
-        if np.linalg.norm(steer) > self.max_force:
-            steer = (steer / np.linalg.norm(steer)) * self.max_force
+        steer = target - self.velocity  # error in speed
         return steer
 
     def update(self):
@@ -100,14 +115,14 @@ class Bird2D:
         """
         self.velocity += self.acceleration
         speed = np.linalg.norm(self.velocity)
-        if speed > self.max_speed: # clip speed
+        if speed > self.max_speed:  # clip speed
             self.velocity = (self.velocity / speed) * self.max_speed
 
-        self.position += self.velocity 
+        self.position += self.velocity
 
         self.theta = np.arctan2(self.velocity[1], self.velocity[0])
 
-        self.acceleration.fill(0) # reset acceleration
+        self.acceleration.fill(0)  # reset acceleration
 
     def apply_force(self, force):
         """
@@ -134,9 +149,16 @@ class Bird2D:
         """
         size = 5  # Triangle size
         points = [
-            self.position + self._rotate(np.array([0, -size]), self.theta+np.pi/2),  # Tip
-            self.position + self._rotate(np.array([size / 2, size]), self.theta+np.pi/2),  # Right wing
-            self.position + self._rotate(np.array([-size / 2, size]), self.theta+np.pi/2),  # Left wing
+            self.position
+            + self._rotate(np.array([0, -size]), self.theta + np.pi / 2),  # Tip
+            self.position
+            + self._rotate(
+                np.array([size / 2, size]), self.theta + np.pi / 2
+            ),  # Right wing
+            self.position
+            + self._rotate(
+                np.array([-size / 2, size]), self.theta + np.pi / 2
+            ),  # Left wing
         ]
         # Convert NumPy arrays to lists for pygame
         points = [point.tolist() for point in points]
@@ -146,8 +168,10 @@ class Bird2D:
         """
         Rotate a 2D point around the origin by the given angle.
         """
-        rotation_matrix = np.array([
-            [np.cos(angle), -np.sin(angle)],
-            [np.sin(angle), np.cos(angle)],
-        ])
+        rotation_matrix = np.array(
+            [
+                [np.cos(angle), -np.sin(angle)],
+                [np.sin(angle), np.cos(angle)],
+            ]
+        )
         return np.dot(rotation_matrix, point)

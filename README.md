@@ -11,8 +11,8 @@ Hi. This was inspired by walking around bussigny and looking at birbs. Big thank
    pip install -r requirements.txt
 
 ## Next steps
-Add walls to the space, such that the birds will avoid them.
-Add easy parameters to vary sim
-Add data collection and analysis
+- [] Add walls to the space, such that the birds will avoid them.
+- [] Add easy parameters to vary sim
+- [] Add data collection and analysis
 
 ![Flocking Simulation](assets/flocking_simulation.gif)
