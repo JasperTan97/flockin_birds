@@ -1,7 +1,6 @@
 # Flocking Simulation
 
-This project simulates flocking behavior in 2D space using `pygame` and `numpy`. The animation is saved as a GIF to demonstrate the behavior of birds following simple rules of alignment, cohesion, and separation.
-Big thanks to chatgpt lol.
+Hi. This was inspired by walking around bussigny and looking at birbs. Big thanks to chatgpt lol.
 
 ## Installation
 
@@ -10,5 +9,10 @@ Big thanks to chatgpt lol.
 3. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
+
+## Next steps
+Add walls to the space, such that the birds will avoid them.
+Add easy parameters to vary sim
+Add data collection and analysis
 
 ![Flocking Simulation](assets/flocking_simulation.gif)

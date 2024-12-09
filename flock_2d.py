@@ -4,7 +4,7 @@ from PIL import Image
 
 from bird_2d import Bird2D
 
-SAVE_ANIMATION = True
+SAVE_ANIMATION = False
 ANIMATION_DURATION = 600 # frames
 
 # Initialize Pygame
